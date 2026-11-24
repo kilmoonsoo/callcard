@@ -34,6 +34,7 @@ object Notifier {
             .setContentTitle("명함을 보낼까요? ($label)")
             .setContentText(formatted(number))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setColor(0xFF0A213B.toInt())
             .setAutoCancel(true)
             .addAction(0, "보내기", send)
             .addAction(0, "안 보내기", skip)

@@ -88,25 +88,63 @@ class Prefs(context: Context) {
         sp.edit().putString("sentDay", map.toString()).apply()
     }
 
-    // ---- 발송 기록 (최근 30건) ----
+    // ---- 처음 설정: 테스트 발송 성공 여부 ----
+    var testDone: Boolean
+        get() = sp.getBoolean("testDone", false)
+        set(v) = sp.edit().putBoolean("testDone", v).apply()
+
+    var lastTestNumber: String
+        get() = sp.getString("lastTestNumber", "") ?: ""
+        set(v) = sp.edit().putString("lastTestNumber", v).apply()
+
+    /** 화면에 바로 반영하기 위한 변경 감지 */
+    fun listen(l: android.content.SharedPreferences.OnSharedPreferenceChangeListener) =
+        sp.registerOnSharedPreferenceChangeListener(l)
+    fun unlisten(l: android.content.SharedPreferences.OnSharedPreferenceChangeListener) =
+        sp.unregisterOnSharedPreferenceChangeListener(l)
+
+    // ---- 발송 기록 (최근 50건) ----
+    enum class Kind { SENT, FAIL, SKIP, INFO }
+
+    data class LogEntry(val ts: Long, val time: String, val number: String, val message: String, val kind: Kind)
+
     @Synchronized
-    fun addLog(number: String, message: String) {
+    fun addLog(number: String, message: String, kind: Kind = Kind.INFO) {
         val arr = JSONArray(sp.getString("log", "[]") ?: "[]")
+        val now = System.currentTimeMillis()
         val entry = JSONObject()
-            .put("t", SimpleDateFormat("MM/dd HH:mm", Locale.KOREA).format(Date()))
+            .put("ts", now)
+            .put("t", SimpleDateFormat("MM/dd HH:mm", Locale.KOREA).format(Date(now)))
             .put("n", if (number.isEmpty()) "-" else Phone.mask(number))
             .put("m", message)
+            .put("k", kind.name)
         val out = JSONArray().put(entry)
         for (i in 0 until minOf(arr.length(), 49)) out.put(arr.get(i))
         sp.edit().putString("log", out.toString()).apply()
     }
 
-    fun logLines(): List<String> {
+    fun logEntries(): List<LogEntry> {
         val arr = JSONArray(sp.getString("log", "[]") ?: "[]")
         return (0 until arr.length()).map {
             val o = arr.getJSONObject(it)
-            "${o.optString("t")}  ${o.optString("n")}  ${o.optString("m")}"
+            val kind = runCatching { Kind.valueOf(o.optString("k")) }.getOrElse {
+                // 이전 버전 기록 호환
+                val m = o.optString("m")
+                when {
+                    m.startsWith("발송 완료") -> Kind.SENT
+                    m.contains("실패") -> Kind.FAIL
+                    m.startsWith("건너뜀") -> Kind.SKIP
+                    else -> Kind.INFO
+                }
+            }
+            LogEntry(o.optLong("ts"), o.optString("t"), o.optString("n"), o.optString("m"), kind)
         }
+    }
+
+    fun sentTodayCount(): Int {
+        val t = today()
+        val f = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
+        return logEntries().count { it.kind == Kind.SENT && it.ts > 0 && f.format(Date(it.ts)) == t }
     }
 }
 

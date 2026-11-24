@@ -37,7 +37,7 @@ class CallStateReceiver : BroadcastReceiver() {
                     }
                 }
             } catch (e: Exception) {
-                Prefs(app).addLog("", "오류: ${e.javaClass.simpleName}")
+                Prefs(app).addLog("", "오류: ${e.javaClass.simpleName}", Prefs.Kind.FAIL)
             } finally {
                 pending.finish()
             }

@@ -21,12 +21,12 @@ object MmsSender {
         val number = Phone.normalize(rawNumber)
         if (number.isEmpty()) return false
         if (!force && prefs.alreadySentToday(number)) {
-            prefs.addLog(number, "건너뜀(오늘 이미 발송)")
+            prefs.addLog(number, "안 보냄: 오늘 이미 보낸 번호", Prefs.Kind.SKIP)
             return false
         }
         val text = prefs.introFor(missed)
         if (!prefs.hasCard && text.isBlank()) {
-            prefs.addLog(number, "건너뜀(명함·소개글 미설정)")
+            prefs.addLog(number, "안 보냄: 명함·문구가 비어 있음", Prefs.Kind.SKIP)
             return false
         }
 
@@ -49,17 +49,18 @@ object MmsSender {
                 file.name.hashCode(),
                 Intent(context, MmsSentReceiver::class.java)
                     .putExtra("number", number)
-                    .putExtra("file", file.absolutePath),
+                    .putExtra("file", file.absolutePath)
+                    .putExtra("test", force),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
             prefs.markSentToday(number) // 같은 통화로 중복 발송되지 않도록 먼저 표시
             smsManager(context).sendMultimediaMessage(context, uri, null, null, sentIntent)
-            prefs.addLog(number, if (missed) "발송 요청(부재중)" else "발송 요청")
+            prefs.addLog(number, if (missed) "발송 중… (부재중 문구)" else "발송 중… (기본 문구)")
             true
         } catch (e: Exception) {
             prefs.unmarkSentToday(number)
-            prefs.addLog(number, "실패: ${e.javaClass.simpleName}")
+            prefs.addLog(number, "발송 실패: ${e.javaClass.simpleName}", Prefs.Kind.FAIL)
             Notifier.showResult(context, number, false)
             false
         }

@@ -1,121 +1,455 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:orientation="vertical"
+    android:background="@color/bg">
 
+    <!-- ===== 헤더 + 작동 상태 ===== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/navy"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="20dp">
 
-        <!-- 버전·업데이트 -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
-            <TextView android:id="@+id/tvVersion" style="@style/Hint" android:layout_width="0dp"
-                android:layout_weight="1" android:layout_height="wrap_content" />
-            <Button android:id="@+id/btnUpdate" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="업데이트 확인" />
-        </LinearLayout>
-
-        <!-- 권한 -->
-        <TextView android:id="@+id/permStatus" style="@style/Body"
-            android:layout_width="match_parent" android:layout_height="wrap_content" />
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <Button android:id="@+id/btnPerm" android:layout_width="0dp" android:layout_weight="1"
-                android:layout_height="wrap_content" android:text="권한 허용" />
-            <Button android:id="@+id/btnBattery" android:layout_width="0dp" android:layout_weight="1"
-                android:layout_height="wrap_content" android:text="배터리 최적화 제외" />
-        </LinearLayout>
-
-        <Switch android:id="@+id/swEnabled" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="12dp"
-            android:text="명함 발송 사용" android:textSize="18sp" android:textStyle="bold" />
-
-        <!-- 명함 -->
-        <TextView style="@style/Section" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="명함 이미지" />
-        <ImageView android:id="@+id/imgCard" android:layout_width="match_parent"
-            android:layout_height="180dp" android:background="#F2F2F2"
-            android:scaleType="fitCenter" android:contentDescription="명함 미리보기" />
-        <Button android:id="@+id/btnPick" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:text="명함 이미지 선택" />
-
-        <Button android:id="@+id/btnTemplate" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="16dp"
-            android:text="✨ 예시 문구 자동 생성" />
-        <TextView style="@style/Hint" android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="회사명·이름·연락처를 넣으면 제목, 소개글, 부재중 문구를 채워 줍니다. 만든 뒤 자유롭게 고치세요." />
-
-        <TextView style="@style/Section" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="제목" />
-        <EditText android:id="@+id/etSubject" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:inputType="text" android:maxLength="40" />
-
-        <TextView style="@style/Section" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="소개글" />
-        <EditText android:id="@+id/etIntro" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:gravity="top"
-            android:hint="안녕하세요, ○○회사 ○○팀 홍길동입니다. 통화 감사합니다…"
-            android:inputType="textMultiLine" android:minLines="4" android:maxLength="1000" />
-
-        <TextView style="@style/Section" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="부재중 전화용 소개글" />
-        <EditText android:id="@+id/etMissedIntro" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:gravity="top"
-            android:hint="안녕하세요, ○○회사 홍길동입니다. 전화를 받지 못해 죄송합니다. 확인 후 바로 연락드리겠습니다."
-            android:inputType="textMultiLine" android:minLines="3" android:maxLength="1000" />
-        <TextView style="@style/Hint" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="비워두면 위의 소개글을 그대로 보냅니다. 명함 이미지는 같이 보냅니다." />
-
-        <!-- 발송 조건 -->
-        <TextView style="@style/Section" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="언제 보낼까요" />
-        <CheckBox android:id="@+id/cbAnswered" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="받은 전화 종료 후" />
-        <CheckBox android:id="@+id/cbMissed" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="부재중 전화" />
-        <CheckBox android:id="@+id/cbMobile" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="휴대폰 번호(010 등)에만 보내기" />
-        <TextView style="@style/Hint" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="같은 번호에는 하루에 한 번만 보냅니다." />
-
-        <TextView style="@style/Section" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="발송 방식" />
-        <RadioGroup android:id="@+id/rgMode" android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <RadioButton android:id="@+id/rbConfirm" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="보내기 전에 알림으로 확인" />
-            <RadioButton android:id="@+id/rbAuto" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="확인 없이 자동 발송" />
-        </RadioGroup>
-
-        <Button android:id="@+id/btnSave" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="12dp"
-            android:text="저장" />
-
-        <!-- 테스트 -->
-        <TextView style="@style/Section" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="테스트 발송 (내 번호 등)" />
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
-            <EditText android:id="@+id/etTest" android:layout_width="0dp" android:layout_weight="1"
-                android:layout_height="wrap_content" android:hint="01012345678"
-                android:inputType="phone" />
-            <Button android:id="@+id/btnTest" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="기본" />
-            <Button android:id="@+id/btnTestMissed" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="부재중" />
+
+            <ImageView
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:src="@drawable/logo_symbol"
+                android:contentDescription="콜명함 로고" />
+
+            <TextView
+                style="@style/H1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="콜명함" />
+
+            <TextView
+                android:id="@+id/tvVersion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/on_navy_2"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/btnUpdate"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:background="@drawable/btn_on_navy"
+                android:gravity="center"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="업데이트 확인"
+                android:textColor="@color/white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
-        <TextView style="@style/Section" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:text="최근 기록" />
-        <TextView android:id="@+id/tvLog" style="@style/Hint"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:fontFamily="monospace" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_status"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/statusDot"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:background="@drawable/dot" />
+
+                <TextView
+                    android:id="@+id/tvStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <Switch
+                    android:id="@+id/swEnabled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:contentDescription="명함 발송 사용"
+                    android:thumbTint="@color/switch_thumb"
+                    android:trackTint="@color/switch_track"
+                    android:scaleX="1.15"
+                    android:scaleY="1.15" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvStatusSub"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:lineSpacingMultiplier="1.2"
+                android:textColor="@color/on_navy_2"
+                android:textSize="14sp" />
+        </LinearLayout>
     </LinearLayout>
-</ScrollView>
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- ===== 처음 설정 체크리스트 ===== -->
+            <LinearLayout android:id="@+id/cardSetup" style="@style/Card">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <TextView
+                        style="@style/CardTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="처음 설정" />
+                    <TextView
+                        android:id="@+id/tvSetupProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_3"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                <TextView
+                    style="@style/Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="위에서부터 차례로 진행하세요. 모두 끝나면 이 카드는 접힙니다." />
+                <LinearLayout
+                    android:id="@+id/setupSteps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvSetupDone"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_card"
+                android:gravity="center_vertical"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:text="✓  처음 설정 완료  ·  다시 보기"
+                android:textColor="@color/mint_text"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <!-- ===== 탭 ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_tabs"
+                android:orientation="horizontal"
+                android:padding="4dp">
+                <TextView android:id="@+id/tabCard" style="@style/Tab" android:text="명함·문구" />
+                <TextView android:id="@+id/tabSend" style="@style/Tab" android:text="발송 설정" />
+                <TextView android:id="@+id/tabLog" style="@style/Tab" android:text="기록" />
+            </LinearLayout>
+
+            <!-- ===== 탭 1: 명함·문구 ===== -->
+            <LinearLayout
+                android:id="@+id/pageCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="명함 이미지" />
+                    <ImageView
+                        android:id="@+id/imgCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_badge"
+                        android:contentDescription="명함 이미지 미리보기"
+                        android:scaleType="fitCenter" />
+                    <TextView
+                        android:id="@+id/tvCardEmpty"
+                        style="@style/Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="명함 사진을 골라 주세요. 문자 용량에 맞게 자동으로 줄여 저장합니다." />
+                    <Button
+                        android:id="@+id/btnPick"
+                        style="@style/Btn.Outline"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="10dp"
+                        android:text="명함 이미지 선택" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="보낼 문구" />
+                    <Button
+                        android:id="@+id/btnTemplate"
+                        style="@style/Btn.Mint"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="12dp"
+                        android:text="✨ 예시 문구 자동 생성" />
+                    <TextView
+                        style="@style/Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="회사명·이름·연락처를 넣으면 아래 세 칸을 채워 줍니다. 만든 뒤 자유롭게 고치세요." />
+
+                    <TextView style="@style/Label" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="제목" />
+                    <EditText
+                        android:id="@+id/etSubject"
+                        style="@style/Input"
+                        android:hint="예: 홈즈 ○○점 홍길동 명함"
+                        android:inputType="text"
+                        android:maxLength="40" />
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="bottom">
+                        <TextView style="@style/Label" android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content" android:text="기본 소개글 (받은 전화 후)" />
+                        <TextView android:id="@+id/tvIntroCount" style="@style/Caption"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginBottom="6dp" />
+                    </LinearLayout>
+                    <EditText
+                        android:id="@+id/etIntro"
+                        style="@style/Input"
+                        android:gravity="top"
+                        android:hint="안녕하세요, ○○회사 ○○팀 홍길동입니다. 통화 감사합니다…"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:maxLength="1000"
+                        android:minLines="4" />
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="bottom">
+                        <TextView style="@style/Label" android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content" android:text="부재중 전화용 소개글" />
+                        <TextView android:id="@+id/tvMissedCount" style="@style/Caption"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginBottom="6dp" />
+                    </LinearLayout>
+                    <EditText
+                        android:id="@+id/etMissedIntro"
+                        style="@style/Input"
+                        android:gravity="top"
+                        android:hint="비워두면 기본 소개글을 보냅니다."
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:maxLength="1000"
+                        android:minLines="3" />
+                    <TextView
+                        style="@style/Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="✓ 입력한 내용은 자동으로 저장됩니다." />
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:gravity="center_vertical" android:orientation="horizontal">
+                        <TextView style="@style/CardTitle" android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content" android:text="받는 사람 화면 미리보기" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_tabs"
+                        android:orientation="horizontal"
+                        android:padding="4dp">
+                        <TextView android:id="@+id/pvBasic" style="@style/Tab" android:layout_height="38dp"
+                            android:textSize="14sp" android:text="기본" />
+                        <TextView android:id="@+id/pvMissed" style="@style/Tab" android:layout_height="38dp"
+                            android:textSize="14sp" android:text="부재중" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:layout_marginEnd="40dp"
+                        android:background="@drawable/bg_bubble"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+                        <ImageView
+                            android:id="@+id/pvImage"
+                            android:layout_width="220dp"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:contentDescription="보낼 명함 이미지"
+                            android:maxHeight="160dp"
+                            android:scaleType="fitStart" />
+                        <TextView
+                            android:id="@+id/pvSubject"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textColor="@color/text_1"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/pvText"
+                            style="@style/Body"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ===== 탭 2: 발송 설정 ===== -->
+            <LinearLayout
+                android:id="@+id/pageSend"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="발송 방식" />
+                    <RadioGroup
+                        android:id="@+id/rgMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp">
+                        <RadioButton
+                            android:id="@+id/rbConfirm"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_choice"
+                            android:buttonTint="@color/choice_tint"
+                            android:padding="14dp" />
+                        <RadioButton
+                            android:id="@+id/rbAuto"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/bg_choice"
+                            android:buttonTint="@color/choice_tint"
+                            android:padding="14dp" />
+                    </RadioGroup>
+                </LinearLayout>
+
+                <LinearLayout style="@style/Card">
+                    <TextView style="@style/CardTitle" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="언제 보낼까요" />
+                    <CheckBox android:id="@+id/cbAnswered" style="@style/Body"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:layout_marginTop="6dp" android:buttonTint="@color/choice_tint"
+                        android:text="받은 전화가 끝난 뒤" />
+                    <CheckBox android:id="@+id/cbMissed" style="@style/Body"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:buttonTint="@color/choice_tint" android:text="부재중 전화" />
+                    <CheckBox android:id="@+id/cbMobile" style="@style/Body"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:buttonTint="@color/choice_tint" android:text="휴대폰 번호(010 등)에만 보내기" />
+                    <TextView style="@style/Caption" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                        android:text="• 같은 번호에는 하루에 한 번만 보냅니다.\n• 내가 건 전화, 거절·차단한 전화, 발신번호 표시 제한 전화에는 보내지 않습니다." />
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/cardTest" style="@style/Card">
+                    <TextView style="@style/CardTitle" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="테스트 발송" />
+                    <TextView style="@style/Caption" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                        android:text="내 번호로 보내서 받는 화면을 확인하세요. '하루 1회' 제한 없이 보냅니다." />
+                    <EditText
+                        android:id="@+id/etTest"
+                        style="@style/Input"
+                        android:layout_marginTop="12dp"
+                        android:hint="받을 번호 (예: 01012345678)"
+                        android:inputType="phone" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp" android:orientation="horizontal">
+                        <Button android:id="@+id/btnTest" style="@style/Btn.Primary"
+                            android:layout_width="0dp" android:layout_weight="1" android:text="기본 문구로" />
+                        <Space android:layout_width="10dp" android:layout_height="1dp" />
+                        <Button android:id="@+id/btnTestMissed" style="@style/Btn.Outline"
+                            android:layout_width="0dp" android:layout_weight="1" android:text="부재중 문구로" />
+                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/tvTestResult"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_badge"
+                        android:padding="12dp"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ===== 탭 3: 기록 ===== -->
+            <LinearLayout
+                android:id="@+id/pageLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/fltAll" style="@style/Tab" android:layout_height="38dp"
+                        android:textSize="14sp" android:text="전체" />
+                    <TextView android:id="@+id/fltSent" style="@style/Tab" android:layout_height="38dp"
+                        android:textSize="14sp" android:text="발송" />
+                    <TextView android:id="@+id/fltSkip" style="@style/Tab" android:layout_height="38dp"
+                        android:textSize="14sp" android:text="안 보냄" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/logList"
+                    style="@style/Card"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp" />
+                <TextView style="@style/Caption" android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="최근 50건까지 이 휴대폰에만 저장됩니다. 번호 가운데는 가려서 표시합니다." />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

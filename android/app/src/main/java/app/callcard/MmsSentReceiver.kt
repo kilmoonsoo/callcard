@@ -13,10 +13,12 @@ class MmsSentReceiver : BroadcastReceiver() {
         intent.getStringExtra("file")?.let { File(it).delete() }
         val prefs = Prefs(context)
         if (resultCode == Activity.RESULT_OK) {
-            prefs.addLog(number, "발송 완료")
+            val test = intent.getBooleanExtra("test", false)
+            prefs.addLog(number, if (test) "발송 완료 (테스트)" else "발송 완료", Prefs.Kind.SENT)
+            if (test) prefs.testDone = true
         } else {
             prefs.unmarkSentToday(number) // 실패 시 다음 통화 때 다시 보낼 수 있게
-            prefs.addLog(number, "발송 실패(코드 $resultCode)")
+            prefs.addLog(number, "발송 실패 (통신사 응답 코드 $resultCode)", Prefs.Kind.FAIL)
             Notifier.showResult(context, number, false)
         }
     }
