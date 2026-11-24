@@ -30,6 +30,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("onMissed", true)
         set(v) = sp.edit().putBoolean("onMissed", v).apply()
 
+    /** 통화 화면에서 거절한 전화도 부재중으로 보고 부재중 문구를 보냄 (차단 번호는 제외) */
+    var onRejected: Boolean
+        get() = sp.getBoolean("onRejected", false)
+        set(v) = sp.edit().putBoolean("onRejected", v).apply()
+
     /** 010 등 휴대폰 번호에만 발송 (유선·대표번호는 MMS 수신 불가) */
     var mobileOnly: Boolean
         get() = sp.getBoolean("mobileOnly", true)

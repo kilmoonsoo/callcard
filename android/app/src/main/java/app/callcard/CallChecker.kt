@@ -35,14 +35,19 @@ object CallChecker {
             if (System.currentTimeMillis() - endedAt > 5 * 60 * 1000) return false
             prefs.lastHandledCallId = id
 
-            val missed = type == CallLog.Calls.MISSED_TYPE
+            val rejected = type == CallLog.Calls.REJECTED_TYPE
+            val missed = type == CallLog.Calls.MISSED_TYPE || rejected
             val wanted = when (type) {
                 CallLog.Calls.INCOMING_TYPE -> prefs.onAnswered
                 CallLog.Calls.MISSED_TYPE -> prefs.onMissed
+                CallLog.Calls.REJECTED_TYPE -> if (prefs.onRejected) prefs.onMissed else {
+                    prefs.addLog(number, "안 보냄: 거절한 전화 (발송 설정에서 켤 수 있음)", Prefs.Kind.SKIP); return true
+                }
                 CallLog.Calls.OUTGOING_TYPE -> return true // 내가 건 전화: 기록하지 않음
-                else -> { prefs.addLog(number, "안 보냄: 거절·차단한 전화", Prefs.Kind.SKIP); return true }
+                CallLog.Calls.BLOCKED_TYPE -> { prefs.addLog(number, "안 보냄: 차단한 번호", Prefs.Kind.SKIP); return true }
+                else -> { prefs.addLog(number, "안 보냄: 기타 통화 (유형 $type)", Prefs.Kind.SKIP); return true }
             }
-            if (!wanted) { prefs.addLog(number, "안 보냄: ${if (missed) "부재중" else "받은 전화"} 발송이 꺼져 있음", Prefs.Kind.SKIP); return true }
+            if (!wanted) { prefs.addLog(number, "안 보냄: ${if (rejected) "거절한 전화(부재중)" else if (missed) "부재중" else "받은 전화"} 발송이 꺼져 있음", Prefs.Kind.SKIP); return true }
             if (number.isEmpty()) { prefs.addLog("", "안 보냄: 발신번호 표시 제한", Prefs.Kind.SKIP); return true }
             if (prefs.mobileOnly && !Phone.isKoreanMobile(number)) { prefs.addLog(number, "안 보냄: 휴대폰 번호가 아님", Prefs.Kind.SKIP); return true }
             if (prefs.alreadySentToday(number)) { prefs.addLog(number, "안 보냄: 오늘 이미 보낸 번호", Prefs.Kind.SKIP); return true }

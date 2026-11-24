@@ -152,7 +152,8 @@ class MainActivity : ComponentActivity() {
             Step("테스트 발송", "내 번호로 보내서 받아 봅니다", prefs.testDone, "보내기") {
                 selectTab(1)
                 v<ScrollView>(R.id.scroll).post {
-                    v<ScrollView>(R.id.scroll).smoothScrollTo(0, v<View>(R.id.cardTest).top + v<View>(R.id.pageSend).top)
+                    val content = v<View>(R.id.pageSend).parent as View
+                    v<ScrollView>(R.id.scroll).smoothScrollTo(0, content.top + v<View>(R.id.pageSend).top + v<View>(R.id.cardTest).top)
                     v<EditText>(R.id.etTest).requestFocus()
                 }
             },
@@ -318,6 +319,11 @@ class MainActivity : ComponentActivity() {
 
         v<CheckBox>(R.id.cbAnswered).apply { isChecked = prefs.onAnswered; setOnCheckedChangeListener { _, b -> prefs.onAnswered = b } }
         v<CheckBox>(R.id.cbMissed).apply { isChecked = prefs.onMissed; setOnCheckedChangeListener { _, b -> prefs.onMissed = b } }
+        v<CheckBox>(R.id.cbRejected).apply {
+            text = twoLine("거절한 전화도 부재중으로 보기", "통화 화면에서 [거절]을 누른 전화에도 부재중 문구를 보냅니다.")
+            isChecked = prefs.onRejected
+            setOnCheckedChangeListener { _, b -> prefs.onRejected = b }
+        }
         v<CheckBox>(R.id.cbMobile).apply { isChecked = prefs.mobileOnly; setOnCheckedChangeListener { _, b -> prefs.mobileOnly = b } }
 
         v<EditText>(R.id.etTest).setText(prefs.lastTestNumber)
@@ -407,7 +413,10 @@ class MainActivity : ComponentActivity() {
                 background = ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_badge)
                 backgroundTintList = ColorStateList.valueOf(color(bg))
                 setPadding(dp(8), dp(3), dp(8), dp(3))
-            }, LinearLayout.LayoutParams(dp(58), LinearLayout.LayoutParams.WRAP_CONTENT))
+                isSingleLine = true
+            }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                width = dp(64)
+            })
             row.addView(LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(12), 0, 0, 0)

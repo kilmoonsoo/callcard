@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/bg">
+    android:background="@color/bg"
+    android:fillViewport="true">
+
+<LinearLayout
+    android:id="@+id/scrollBody"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <!-- ===== 헤더 + 작동 상태 ===== -->
     <LinearLayout
@@ -109,13 +116,6 @@
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
-
-    <ScrollView
-        android:id="@+id/scroll"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -382,12 +382,16 @@
                     <CheckBox android:id="@+id/cbMissed" style="@style/Body"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:buttonTint="@color/choice_tint" android:text="부재중 전화" />
+                    <CheckBox android:id="@+id/cbRejected" style="@style/Body"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:minHeight="48dp" android:paddingTop="6dp" android:paddingBottom="6dp"
+                        android:buttonTint="@color/choice_tint" />
                     <CheckBox android:id="@+id/cbMobile" style="@style/Body"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:buttonTint="@color/choice_tint" android:text="휴대폰 번호(010 등)에만 보내기" />
                     <TextView style="@style/Caption" android:layout_width="match_parent"
                         android:layout_height="wrap_content" android:layout_marginTop="4dp"
-                        android:text="• 같은 번호에는 하루에 한 번만 보냅니다.\n• 내가 건 전화, 거절·차단한 전화, 발신번호 표시 제한 전화에는 보내지 않습니다." />
+                        android:text="• 같은 번호에는 하루에 한 번만 보냅니다.\n• 내가 건 전화, 차단한 번호, 발신번호 표시 제한 전화에는 보내지 않습니다." />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/cardTest" style="@style/Card">
@@ -451,5 +455,5 @@
                     android:text="최근 50건까지 이 휴대폰에만 저장됩니다. 번호 가운데는 가려서 표시합니다." />
             </LinearLayout>
         </LinearLayout>
-    </ScrollView>
 </LinearLayout>
+</ScrollView>
