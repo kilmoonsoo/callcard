@@ -14,11 +14,11 @@ class MmsSentReceiver : BroadcastReceiver() {
         val prefs = Prefs(context)
         if (resultCode == Activity.RESULT_OK) {
             val test = intent.getBooleanExtra("test", false)
-            prefs.addLog(number, if (test) "발송 완료 (테스트)" else "발송 완료", Prefs.Kind.SENT)
+            prefs.addLog(number, if (test) "발송 완료 (테스트)" else "발송 완료", Prefs.Kind.SENT, test = test)
             if (test) prefs.testDone = true
         } else {
-            prefs.unmarkSentToday(number) // 실패 시 다음 통화 때 다시 보낼 수 있게
-            prefs.addLog(number, "발송 실패 (통신사 응답 코드 $resultCode)", Prefs.Kind.FAIL)
+            if (!intent.getBooleanExtra("test", false)) prefs.unmarkSentToday(number) // 실패 시 다음 통화 때 다시 보낼 수 있게
+            prefs.addLog(number, "발송 실패 (통신사 응답 코드 $resultCode)", Prefs.Kind.FAIL, test = intent.getBooleanExtra("test", false))
             Notifier.showResult(context, number, false)
         }
     }

@@ -26,7 +26,7 @@ object MmsSender {
         }
         val text = prefs.introFor(missed)
         if (!prefs.hasCard && text.isBlank()) {
-            prefs.addLog(number, "안 보냄: 명함·문구가 비어 있음", Prefs.Kind.SKIP)
+            prefs.addLog(number, "안 보냄: 명함·문구가 비어 있음", Prefs.Kind.SKIP, test = force)
             return false
         }
 
@@ -54,13 +54,13 @@ object MmsSender {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            prefs.markSentToday(number) // 같은 통화로 중복 발송되지 않도록 먼저 표시
+            if (!force) prefs.markSentToday(number) // 같은 통화로 중복 발송되지 않도록 먼저 표시 (테스트는 제외)
             smsManager(context).sendMultimediaMessage(context, uri, null, null, sentIntent)
-            prefs.addLog(number, if (missed) "발송 중… (부재중 문구)" else "발송 중… (기본 문구)")
+            prefs.addLog(number, (if (missed) "발송 중… (부재중 문구)" else "발송 중… (기본 문구)") + if (force) " · 테스트" else "", test = force)
             true
         } catch (e: Exception) {
-            prefs.unmarkSentToday(number)
-            prefs.addLog(number, "발송 실패: ${e.javaClass.simpleName}", Prefs.Kind.FAIL)
+            if (!force) prefs.unmarkSentToday(number)
+            prefs.addLog(number, "발송 실패: ${e.javaClass.simpleName}", Prefs.Kind.FAIL, test = force)
             Notifier.showResult(context, number, false)
             false
         }

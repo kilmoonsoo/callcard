@@ -106,10 +106,10 @@ class Prefs(context: Context) {
     // ---- 발송 기록 (최근 50건) ----
     enum class Kind { SENT, FAIL, SKIP, INFO }
 
-    data class LogEntry(val ts: Long, val time: String, val number: String, val message: String, val kind: Kind)
+    data class LogEntry(val ts: Long, val time: String, val number: String, val message: String, val kind: Kind, val test: Boolean)
 
     @Synchronized
-    fun addLog(number: String, message: String, kind: Kind = Kind.INFO) {
+    fun addLog(number: String, message: String, kind: Kind = Kind.INFO, test: Boolean = false) {
         val arr = JSONArray(sp.getString("log", "[]") ?: "[]")
         val now = System.currentTimeMillis()
         val entry = JSONObject()
@@ -118,6 +118,7 @@ class Prefs(context: Context) {
             .put("n", if (number.isEmpty()) "-" else Phone.mask(number))
             .put("m", message)
             .put("k", kind.name)
+            .put("test", test)
         val out = JSONArray().put(entry)
         for (i in 0 until minOf(arr.length(), 49)) out.put(arr.get(i))
         sp.edit().putString("log", out.toString()).apply()
@@ -137,14 +138,14 @@ class Prefs(context: Context) {
                     else -> Kind.INFO
                 }
             }
-            LogEntry(o.optLong("ts"), o.optString("t"), o.optString("n"), o.optString("m"), kind)
+            LogEntry(o.optLong("ts"), o.optString("t"), o.optString("n"), o.optString("m"), kind, o.optBoolean("test"))
         }
     }
 
     fun sentTodayCount(): Int {
         val t = today()
         val f = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-        return logEntries().count { it.kind == Kind.SENT && it.ts > 0 && f.format(Date(it.ts)) == t }
+        return logEntries().count { it.kind == Kind.SENT && !it.test && it.ts > 0 && f.format(Date(it.ts)) == t }
     }
 }
 

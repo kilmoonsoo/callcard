@@ -337,7 +337,8 @@ class MainActivity : ComponentActivity() {
 
     private fun refreshTestResult() {
         if (testStartedAt == 0L) return
-        val e = prefs.logEntries().firstOrNull { it.ts >= testStartedAt && it.kind != Prefs.Kind.INFO } ?: return
+        // 테스트 발송으로 남은 기록만 봅니다 (그사이 들어온 실제 통화 기록은 제외)
+        val e = prefs.logEntries().firstOrNull { it.test && it.ts >= testStartedAt && it.kind != Prefs.Kind.INFO } ?: return
         when (e.kind) {
             Prefs.Kind.SENT -> showTestResult("✅ 발송 완료 — 휴대폰에 문자가 왔는지 확인하세요.", R.color.mint_text, R.color.mint_bg)
             Prefs.Kind.FAIL -> showTestResult("❌ ${e.message}\n모바일 데이터가 켜져 있는지, 기본 문자 앱으로 MMS가 보내지는지 확인해 주세요.", R.color.red, R.color.red_bg)
