@@ -11,6 +11,11 @@ on:
 permissions:
   contents: write
 
+# 같은 브랜치에서 빌드가 겹치면 이전 빌드를 취소합니다.
+concurrency:
+  group: release-android
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
