@@ -1,0 +1,61 @@
+name: Android 빌드·배포
+
+# android/ 폴더가 바뀌어 main에 올라가면 APK를 빌드해서 GitHub Releases에 올립니다.
+# 앱은 Releases의 최신 버전을 확인해 업데이트를 안내합니다.
+on:
+  push:
+    branches: [main]
+    paths: ["android/**", ".github/workflows/release-android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: 서명 키 준비
+        env:
+          KEYSTORE_B64: ${{ secrets.CALLCARD_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::저장소 Secrets에 CALLCARD_KEYSTORE_B64가 없습니다."; exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+
+      - name: APK 빌드
+        working-directory: android
+        env:
+          CALLCARD_VERSION_CODE: ${{ github.run_number }}0
+          CALLCARD_KEYSTORE: ${{ runner.temp }}/release.jks
+          CALLCARD_KEYSTORE_PASSWORD: ${{ secrets.CALLCARD_KEYSTORE_PASSWORD }}
+          CALLCARD_KEY_ALIAS: ${{ secrets.CALLCARD_KEY_ALIAS }}
+          CALLCARD_KEY_PASSWORD: ${{ secrets.CALLCARD_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Release 올리기
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODE: ${{ github.run_number }}0
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk "callcard-v1.$CODE.apk"
+          printf '%s\n\n설치: 아래 callcard-v1.%s.apk 를 휴대폰에서 내려받아 설치하세요.\n' "${MSG:-수동 빌드}" "$CODE" > notes.md
+          gh release create "build-$CODE" "callcard-v1.$CODE.apk" \
+            --title "콜명함 v1.$CODE" --notes-file notes.md --latest
+
+      - name: 서명 키 삭제
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
