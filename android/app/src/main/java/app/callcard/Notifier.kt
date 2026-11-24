@@ -25,7 +25,7 @@ object Notifier {
         nm.createNotificationChannel(NotificationChannel(CH_RESULT, "발송 결과", NotificationManager.IMPORTANCE_DEFAULT))
     }
 
-    fun showConfirm(context: Context, number: String, missed: Boolean) {
+    fun showConfirm(context: Context, number: String, missed: Boolean): Boolean {
         val label = if (missed) "부재중" else "통화 종료"
         val send = action(context, ACTION_SEND, number, missed)
         val skip = action(context, ACTION_SKIP, number, missed)
@@ -38,7 +38,7 @@ object Notifier {
             .addAction(0, "보내기", send)
             .addAction(0, "안 보내기", skip)
             .build()
-        notify(context, idFor(number), n)
+        return notify(context, idFor(number), n)
     }
 
     fun showResult(context: Context, number: String, ok: Boolean) {
@@ -77,11 +77,13 @@ object Notifier {
     private fun formatted(n: String) =
         if (n.length == 11) "${n.take(3)}-${n.substring(3, 7)}-${n.takeLast(4)}" else n
 
-    private fun notify(context: Context, id: Int, n: android.app.Notification) {
+    private fun notify(context: Context, id: Int, n: android.app.Notification): Boolean {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
             == PackageManager.PERMISSION_GRANTED || android.os.Build.VERSION.SDK_INT < 33) {
             createChannels(context)
             NotificationManagerCompat.from(context).notify(id, n)
+            return true
         }
+        return false
     }
 }

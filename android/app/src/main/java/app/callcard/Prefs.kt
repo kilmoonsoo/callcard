@@ -94,10 +94,10 @@ class Prefs(context: Context) {
         val arr = JSONArray(sp.getString("log", "[]") ?: "[]")
         val entry = JSONObject()
             .put("t", SimpleDateFormat("MM/dd HH:mm", Locale.KOREA).format(Date()))
-            .put("n", Phone.mask(number))
+            .put("n", if (number.isEmpty()) "-" else Phone.mask(number))
             .put("m", message)
         val out = JSONArray().put(entry)
-        for (i in 0 until minOf(arr.length(), 29)) out.put(arr.get(i))
+        for (i in 0 until minOf(arr.length(), 49)) out.put(arr.get(i))
         sp.edit().putString("log", out.toString()).apply()
     }
 

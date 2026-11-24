@@ -63,6 +63,11 @@ class MainActivity : ComponentActivity() {
         v<Button>(R.id.btnPick).setOnClickListener {
             pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
+        // 발송 방식을 바꾸면 바로 저장 (저장 버튼을 안 눌러도 적용)
+        v<RadioGroup>(R.id.rgMode).setOnCheckedChangeListener { _, id -> prefs.autoSend = id == R.id.rbAuto }
+        v<CheckBox>(R.id.cbAnswered).setOnCheckedChangeListener { _, b -> prefs.onAnswered = b }
+        v<CheckBox>(R.id.cbMissed).setOnCheckedChangeListener { _, b -> prefs.onMissed = b }
+        v<CheckBox>(R.id.cbMobile).setOnCheckedChangeListener { _, b -> prefs.mobileOnly = b }
         v<Switch>(R.id.swEnabled).setOnCheckedChangeListener { sw, on ->
             if (on && !allGranted()) {
                 sw.isChecked = false
