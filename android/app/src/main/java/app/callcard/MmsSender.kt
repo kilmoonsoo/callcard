@@ -13,10 +13,10 @@ object MmsSender {
     /**
      * 명함 이미지 + 소개글을 MMS로 보냅니다.
      * @param force true면 '하루 1회' 제한을 무시합니다(테스트 발송용).
-     * @param missed true면 부재중 전화용 소개글을 보냅니다.
+     * @param type 기본 / 부재중 / 연결 안 됨 중 보낼 문구
      * @return 발송 요청 여부
      */
-    fun send(context: Context, rawNumber: String, force: Boolean = false, missed: Boolean = false): Boolean {
+    fun send(context: Context, rawNumber: String, force: Boolean = false, type: MsgType = MsgType.BASIC): Boolean {
         val prefs = Prefs(context)
         val number = Phone.normalize(rawNumber)
         if (number.isEmpty()) return false
@@ -24,7 +24,7 @@ object MmsSender {
             prefs.addLog(number, "안 보냄: 오늘 이미 보낸 번호", Prefs.Kind.SKIP)
             return false
         }
-        val text = prefs.introFor(missed)
+        val text = prefs.introFor(type)
         if (!prefs.hasCard && text.isBlank()) {
             prefs.addLog(number, "안 보냄: 명함·문구가 비어 있음", Prefs.Kind.SKIP, test = force)
             return false
@@ -56,7 +56,7 @@ object MmsSender {
 
             if (!force) prefs.markSentToday(number) // 같은 통화로 중복 발송되지 않도록 먼저 표시 (테스트는 제외)
             smsManager(context).sendMultimediaMessage(context, uri, null, null, sentIntent)
-            prefs.addLog(number, (if (missed) "발송 중… (부재중 문구)" else "발송 중… (기본 문구)") + if (force) " · 테스트" else "", test = force)
+            prefs.addLog(number, "발송 중… (${type.label} 문구)" + if (force) " · 테스트" else "", test = force)
             true
         } catch (e: Exception) {
             if (!force) prefs.unmarkSentToday(number)

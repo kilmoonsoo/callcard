@@ -35,27 +35,42 @@ object CallChecker {
             if (System.currentTimeMillis() - endedAt > 5 * 60 * 1000) return false
             prefs.lastHandledCallId = id
 
-            val rejected = type == CallLog.Calls.REJECTED_TYPE
-            val missed = type == CallLog.Calls.MISSED_TYPE || rejected
-            val wanted = when (type) {
-                CallLog.Calls.INCOMING_TYPE -> prefs.onAnswered
-                CallLog.Calls.MISSED_TYPE -> prefs.onMissed
-                CallLog.Calls.REJECTED_TYPE -> if (prefs.onRejected) prefs.onMissed else {
-                    prefs.addLog(number, "안 보냄: 거절한 전화 (발송 설정에서 켤 수 있음)", Prefs.Kind.SKIP); return true
+            val duration = it.getLong(4)
+            val msg: MsgType
+            val wanted: Boolean
+            when (type) {
+                CallLog.Calls.INCOMING_TYPE -> { msg = MsgType.BASIC; wanted = prefs.onAnswered }
+                CallLog.Calls.MISSED_TYPE -> { msg = MsgType.MISSED; wanted = prefs.onMissed }
+                CallLog.Calls.REJECTED_TYPE -> {
+                    if (!prefs.onRejected) {
+                        prefs.addLog(number, "안 보냄: 거절한 전화 (발송 설정에서 켤 수 있음)", Prefs.Kind.SKIP); return true
+                    }
+                    msg = MsgType.MISSED; wanted = prefs.onMissed
                 }
-                CallLog.Calls.OUTGOING_TYPE -> return true // 내가 건 전화: 기록하지 않음
+                CallLog.Calls.OUTGOING_TYPE -> {
+                    if (duration > 0) return true // 내가 건 전화가 연결됨: 보내지 않고 기록도 안 함
+                    msg = MsgType.NO_ANSWER; wanted = prefs.onNoAnswer
+                }
                 CallLog.Calls.BLOCKED_TYPE -> { prefs.addLog(number, "안 보냄: 차단한 번호", Prefs.Kind.SKIP); return true }
                 else -> { prefs.addLog(number, "안 보냄: 기타 통화 (유형 $type)", Prefs.Kind.SKIP); return true }
             }
-            if (!wanted) { prefs.addLog(number, "안 보냄: ${if (rejected) "거절한 전화(부재중)" else if (missed) "부재중" else "받은 전화"} 발송이 꺼져 있음", Prefs.Kind.SKIP); return true }
+            if (!wanted) {
+                val what = when {
+                    type == CallLog.Calls.REJECTED_TYPE -> "거절한 전화(부재중)"
+                    msg == MsgType.MISSED -> "부재중"
+                    msg == MsgType.NO_ANSWER -> "연결 안 된 발신"
+                    else -> "받은 전화"
+                }
+                prefs.addLog(number, "안 보냄: $what 발송이 꺼져 있음", Prefs.Kind.SKIP); return true
+            }
             if (number.isEmpty()) { prefs.addLog("", "안 보냄: 발신번호 표시 제한", Prefs.Kind.SKIP); return true }
             if (prefs.mobileOnly && !Phone.isKoreanMobile(number)) { prefs.addLog(number, "안 보냄: 휴대폰 번호가 아님", Prefs.Kind.SKIP); return true }
             if (prefs.alreadySentToday(number)) { prefs.addLog(number, "안 보냄: 오늘 이미 보낸 번호", Prefs.Kind.SKIP); return true }
 
             if (prefs.autoSend) {
-                MmsSender.send(ctx, number, missed = missed)
+                MmsSender.send(ctx, number, type = msg)
             } else {
-                val shown = Notifier.showConfirm(ctx, number, missed)
+                val shown = Notifier.showConfirm(ctx, number, msg)
                 if (shown) prefs.addLog(number, "확인 알림을 띄움 — 알림에서 [보내기]를 눌러 주세요")
                 else prefs.addLog(number, "안 보냄: 알림 권한이 꺼져 있음 (확인 후 발송 모드)", Prefs.Kind.SKIP)
             }

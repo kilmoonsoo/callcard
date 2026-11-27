@@ -233,7 +233,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
-                        android:text="회사명·이름·연락처를 넣으면 아래 세 칸을 채워 줍니다. 만든 뒤 자유롭게 고치세요." />
+                        android:text="회사명·이름·연락처를 넣으면 아래 네 칸(제목·기본·부재중·연결 안 됨)을 채워 줍니다. 만든 뒤 자유롭게 고치세요." />
 
                     <TextView style="@style/Label" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:text="제목" />
@@ -277,6 +277,23 @@
                         android:inputType="textMultiLine|textCapSentences"
                         android:maxLength="1000"
                         android:minLines="3" />
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="bottom">
+                        <TextView style="@style/Label" android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content" android:text="내가 건 전화를 받지 않았을 때" />
+                        <TextView android:id="@+id/tvNoAnswerCount" style="@style/Caption"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginBottom="6dp" />
+                    </LinearLayout>
+                    <EditText
+                        android:id="@+id/etNoAnswerIntro"
+                        style="@style/Input"
+                        android:gravity="top"
+                        android:hint="예: 방금 전화드렸는데 연결이 되지 않아 문자로 인사드립니다. (비워두면 기본 소개글)"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:maxLength="1000"
+                        android:minLines="3" />
                     <TextView
                         style="@style/Caption"
                         android:layout_width="match_parent"
@@ -302,6 +319,8 @@
                             android:textSize="14sp" android:text="기본" />
                         <TextView android:id="@+id/pvMissed" style="@style/Tab" android:layout_height="38dp"
                             android:textSize="14sp" android:text="부재중" />
+                        <TextView android:id="@+id/pvNoAnswer" style="@style/Tab" android:layout_height="38dp"
+                            android:textSize="14sp" android:text="연결 안 됨" />
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -382,6 +401,10 @@
                     <CheckBox android:id="@+id/cbMissed" style="@style/Body"
                         android:layout_width="match_parent" android:layout_height="48dp"
                         android:buttonTint="@color/choice_tint" android:text="부재중 전화" />
+                    <CheckBox android:id="@+id/cbNoAnswer" style="@style/Body"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:minHeight="48dp" android:paddingTop="6dp" android:paddingBottom="6dp"
+                        android:buttonTint="@color/choice_tint" />
                     <CheckBox android:id="@+id/cbRejected" style="@style/Body"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:minHeight="48dp" android:paddingTop="6dp" android:paddingBottom="6dp"
@@ -391,7 +414,7 @@
                         android:buttonTint="@color/choice_tint" android:text="휴대폰 번호(010 등)에만 보내기" />
                     <TextView style="@style/Caption" android:layout_width="match_parent"
                         android:layout_height="wrap_content" android:layout_marginTop="4dp"
-                        android:text="• 같은 번호에는 하루에 한 번만 보냅니다.\n• 내가 건 전화, 차단한 번호, 발신번호 표시 제한 전화에는 보내지 않습니다." />
+                        android:text="• 같은 번호에는 하루에 한 번만 보냅니다.\n• 통화가 연결된 내가 건 전화, 차단한 번호, 발신번호 표시 제한 전화에는 보내지 않습니다." />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/cardTest" style="@style/Card">
@@ -414,6 +437,9 @@
                         <Button android:id="@+id/btnTestMissed" style="@style/Btn.Outline"
                             android:layout_width="0dp" android:layout_weight="1" android:text="부재중 문구로" />
                     </LinearLayout>
+                    <Button android:id="@+id/btnTestNoAnswer" style="@style/Btn.Outline"
+                        android:layout_width="match_parent" android:layout_marginTop="10dp"
+                        android:text="연결 안 됨 문구로" />
                     <TextView
                         android:id="@+id/tvTestResult"
                         android:layout_width="match_parent"

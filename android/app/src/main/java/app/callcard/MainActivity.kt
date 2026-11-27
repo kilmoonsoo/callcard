@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var prefs: Prefs
     private var tab = 0                 // 0 명함·문구, 1 발송 설정, 2 기록
     private var logFilter = 0           // 0 전체, 1 발송, 2 안 보냄
-    private var previewMissed = false
+    private var previewType = MsgType.BASIC
     private var setupExpanded = false
     private var testStartedAt = 0L
 
@@ -266,9 +266,13 @@ class MainActivity : ComponentActivity() {
         subject.afterChange { prefs.subject = it.trim(); refreshPreview() }
         intro.afterChange { prefs.intro = it.trim(); refreshCounts(); refreshPreview() }
         missed.afterChange { prefs.missedIntro = it.trim(); refreshCounts(); refreshPreview() }
+        val noAnswer = v<EditText>(R.id.etNoAnswerIntro)
+        noAnswer.setText(prefs.noAnswerIntro)
+        noAnswer.afterChange { prefs.noAnswerIntro = it.trim(); refreshCounts(); refreshPreview() }
 
-        v<View>(R.id.pvBasic).setOnClickListener { previewMissed = false; refreshPreview() }
-        v<View>(R.id.pvMissed).setOnClickListener { previewMissed = true; refreshPreview() }
+        v<View>(R.id.pvBasic).setOnClickListener { previewType = MsgType.BASIC; refreshPreview() }
+        v<View>(R.id.pvMissed).setOnClickListener { previewType = MsgType.MISSED; refreshPreview() }
+        v<View>(R.id.pvNoAnswer).setOnClickListener { previewType = MsgType.NO_ANSWER; refreshPreview() }
     }
 
     private fun pickCard() =
@@ -290,11 +294,13 @@ class MainActivity : ComponentActivity() {
     private fun refreshCounts() {
         v<TextView>(R.id.tvIntroCount).text = "${v<EditText>(R.id.etIntro).length()} / 1000"
         v<TextView>(R.id.tvMissedCount).text = "${v<EditText>(R.id.etMissedIntro).length()} / 1000"
+        v<TextView>(R.id.tvNoAnswerCount).text = "${v<EditText>(R.id.etNoAnswerIntro).length()} / 1000"
     }
 
     private fun refreshPreview() {
-        v<TextView>(R.id.pvBasic).apply { isSelected = !previewMissed; setTypeface(null, if (!previewMissed) Typeface.BOLD else Typeface.NORMAL) }
-        v<TextView>(R.id.pvMissed).apply { isSelected = previewMissed; setTypeface(null, if (previewMissed) Typeface.BOLD else Typeface.NORMAL) }
+        mapOf(R.id.pvBasic to MsgType.BASIC, R.id.pvMissed to MsgType.MISSED, R.id.pvNoAnswer to MsgType.NO_ANSWER).forEach { (id, t) ->
+            v<TextView>(id).apply { isSelected = previewType == t; setTypeface(null, if (previewType == t) Typeface.BOLD else Typeface.NORMAL) }
+        }
         val img = v<ImageView>(R.id.pvImage)
         if (prefs.hasCard) {
             img.visibility = View.VISIBLE
@@ -302,7 +308,7 @@ class MainActivity : ComponentActivity() {
         } else img.visibility = View.GONE
         val subj = prefs.subject
         v<TextView>(R.id.pvSubject).apply { text = subj; visibility = if (subj.isBlank()) View.GONE else View.VISIBLE }
-        val body = prefs.introFor(previewMissed)
+        val body = prefs.introFor(previewType)
         v<TextView>(R.id.pvText).apply {
             if (body.isBlank()) { text = "문구를 입력하면 여기에 보입니다."; setTextColor(color(R.color.text_3)) }
             else { text = body; setTextColor(color(R.color.text_1)) }
@@ -319,6 +325,11 @@ class MainActivity : ComponentActivity() {
 
         v<CheckBox>(R.id.cbAnswered).apply { isChecked = prefs.onAnswered; setOnCheckedChangeListener { _, b -> prefs.onAnswered = b } }
         v<CheckBox>(R.id.cbMissed).apply { isChecked = prefs.onMissed; setOnCheckedChangeListener { _, b -> prefs.onMissed = b } }
+        v<CheckBox>(R.id.cbNoAnswer).apply {
+            text = twoLine("내가 건 전화를 상대가 받지 않았을 때", "발신 후 연결되지 않으면 '연결 안 됨' 문구를 보냅니다.")
+            isChecked = prefs.onNoAnswer
+            setOnCheckedChangeListener { _, b -> prefs.onNoAnswer = b }
+        }
         v<CheckBox>(R.id.cbRejected).apply {
             text = twoLine("거절한 전화도 부재중으로 보기", "통화 화면에서 [거절]을 누른 전화에도 부재중 문구를 보냅니다.")
             isChecked = prefs.onRejected
@@ -327,18 +338,19 @@ class MainActivity : ComponentActivity() {
         v<CheckBox>(R.id.cbMobile).apply { isChecked = prefs.mobileOnly; setOnCheckedChangeListener { _, b -> prefs.mobileOnly = b } }
 
         v<EditText>(R.id.etTest).setText(prefs.lastTestNumber)
-        v<View>(R.id.btnTest).setOnClickListener { testSend(missed = false) }
-        v<View>(R.id.btnTestMissed).setOnClickListener { testSend(missed = true) }
+        v<View>(R.id.btnTest).setOnClickListener { testSend(MsgType.BASIC) }
+        v<View>(R.id.btnTestMissed).setOnClickListener { testSend(MsgType.MISSED) }
+        v<View>(R.id.btnTestNoAnswer).setOnClickListener { testSend(MsgType.NO_ANSWER) }
     }
 
-    private fun testSend(missed: Boolean) {
+    private fun testSend(type: MsgType) {
         val n = Phone.normalize(v<EditText>(R.id.etTest).text.toString())
         if (n.isEmpty()) { toast("받을 번호를 입력해 주세요."); return }
         if (!allGranted()) { permLauncher.launch(required); return }
         prefs.lastTestNumber = n
         testStartedAt = System.currentTimeMillis()
         showTestResult("⏳ 보내는 중… 결과가 몇 초 안에 여기에 표시됩니다.", R.color.amber, R.color.amber_bg)
-        if (!MmsSender.send(this, n, force = true, missed = missed)) refreshTestResult()
+        if (!MmsSender.send(this, n, force = true, type = type)) refreshTestResult()
     }
 
     private fun refreshTestResult() {
@@ -566,10 +578,11 @@ class MainActivity : ComponentActivity() {
                     v<EditText>(R.id.etSubject).setText(r.subject)
                     v<EditText>(R.id.etIntro).setText(r.intro)
                     v<EditText>(R.id.etMissedIntro).setText(r.missed)
+                    v<EditText>(R.id.etNoAnswerIntro).setText(r.noAnswer)
                     selectTab(0)
                     toast("예시 문구를 넣었습니다. 미리보기로 확인하고 필요하면 고쳐 주세요.")
                 }
-                val hasText = v<EditText>(R.id.etIntro).text.isNotBlank() || v<EditText>(R.id.etMissedIntro).text.isNotBlank()
+                val hasText = listOf(R.id.etIntro, R.id.etMissedIntro, R.id.etNoAnswerIntro).any { v<EditText>(it).text.isNotBlank() }
                 if (!hasText) apply()
                 else AlertDialog.Builder(this)
                     .setMessage("지금 입력된 문구를 예시 문구로 바꿀까요?")

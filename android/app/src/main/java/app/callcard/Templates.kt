@@ -10,7 +10,7 @@ object Templates {
         val phone: String, val address: String, val hours: String,
     )
 
-    data class Result(val subject: String, val intro: String, val missed: String)
+    data class Result(val subject: String, val intro: String, val missed: String, val noAnswer: String)
 
     fun generate(i: Info, tone: Tone): Result {
         val who = listOf(i.org, i.name, i.title).filter { it.isNotBlank() }.joinToString(" ")
@@ -25,6 +25,7 @@ object Templates {
 
         val intro: String
         val missed: String
+        val noAnswer: String
         when (tone) {
             Tone.POLITE -> {
                 intro = lines(
@@ -41,6 +42,13 @@ object Templates {
                     "확인하는 대로 바로 연락드리겠습니다.",
                     "",
                     "급하신 경우 문자로 용건을 남겨 주시면 빠르게 답변드리겠습니다.",
+                    contactBlock,
+                )
+                noAnswer = lines(
+                    "안녕하세요, ${who}입니다.",
+                    "방금 전화드렸는데 연결이 되지 않아 문자로 인사드립니다.",
+                    "편하신 시간에 연락 주시면 감사하겠습니다.",
+                    "",
                     contactBlock,
                 )
             }
@@ -61,6 +69,13 @@ object Templates {
                     "급하시면 문자로 남겨 주세요!",
                     contactBlock,
                 )
+                noAnswer = lines(
+                    "안녕하세요! ${who}${yeyo(who)}.",
+                    "전화드렸는데 연결이 안 돼서 문자 남겨요 😊",
+                    "편하실 때 연락 주세요!",
+                    "",
+                    contactBlock,
+                )
             }
             Tone.SHORT -> {
                 intro = lines(
@@ -73,9 +88,14 @@ object Templates {
                     "부재중이라 죄송합니다. 곧 연락드리겠습니다.",
                     contact.joinToString("  "),
                 )
+                noAnswer = lines(
+                    "${who}입니다.",
+                    "전화드렸으나 연결되지 않아 연락처 남깁니다.",
+                    contact.joinToString("  "),
+                )
             }
         }
-        return Result(subject, intro, missed)
+        return Result(subject, intro, missed, noAnswer)
     }
 
     /** 받침이 있으면 '이에요', 없으면 '예요' */

@@ -25,10 +25,10 @@ object Notifier {
         nm.createNotificationChannel(NotificationChannel(CH_RESULT, "발송 결과", NotificationManager.IMPORTANCE_DEFAULT))
     }
 
-    fun showConfirm(context: Context, number: String, missed: Boolean): Boolean {
-        val label = if (missed) "부재중" else "통화 종료"
-        val send = action(context, ACTION_SEND, number, missed)
-        val skip = action(context, ACTION_SKIP, number, missed)
+    fun showConfirm(context: Context, number: String, type: MsgType): Boolean {
+        val label = when (type) { MsgType.MISSED -> "부재중"; MsgType.NO_ANSWER -> "상대가 받지 않음"; MsgType.BASIC -> "통화 종료" }
+        val send = action(context, ACTION_SEND, number, type)
+        val skip = action(context, ACTION_SKIP, number, type)
         val n = NotificationCompat.Builder(context, CH_CONFIRM)
             .setSmallIcon(R.drawable.ic_stat)
             .setContentTitle("명함을 보낼까요? ($label)")
@@ -68,10 +68,10 @@ object Notifier {
         notify(context, 9001, n)
     }
 
-    private fun action(context: Context, act: String, number: String, missed: Boolean): PendingIntent =
+    private fun action(context: Context, act: String, number: String, type: MsgType): PendingIntent =
         PendingIntent.getBroadcast(
             context, (act + number).hashCode(),
-            Intent(context, ConfirmActionReceiver::class.java).setAction(act).putExtra("number", number).putExtra("missed", missed),
+            Intent(context, ConfirmActionReceiver::class.java).setAction(act).putExtra("number", number).putExtra("type", type.name),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 

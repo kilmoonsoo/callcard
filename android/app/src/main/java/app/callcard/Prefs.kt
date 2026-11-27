@@ -53,8 +53,21 @@ class Prefs(context: Context) {
         get() = sp.getString("missedIntro", "") ?: ""
         set(v) = sp.edit().putString("missedIntro", v).apply()
 
-    fun introFor(missed: Boolean): String =
-        if (missed && missedIntro.isNotBlank()) missedIntro else intro
+    /** 내가 건 전화를 상대가 받지 않았을 때 보낼 문구. 비워두면 기본 소개글 */
+    var noAnswerIntro: String
+        get() = sp.getString("noAnswerIntro", "") ?: ""
+        set(v) = sp.edit().putString("noAnswerIntro", v).apply()
+
+    /** 내가 건 전화를 상대가 받지 않았을 때도 보냄 */
+    var onNoAnswer: Boolean
+        get() = sp.getBoolean("onNoAnswer", true)
+        set(v) = sp.edit().putBoolean("onNoAnswer", v).apply()
+
+    fun introFor(type: MsgType): String = when (type) {
+        MsgType.MISSED -> missedIntro.ifBlank { intro }
+        MsgType.NO_ANSWER -> noAnswerIntro.ifBlank { intro }
+        MsgType.BASIC -> intro
+    }
 
     /** 예시 문구 생성 창에 입력했던 값 */
     fun getField(key: String): String = sp.getString("tpl_$key", "") ?: ""
@@ -152,6 +165,12 @@ class Prefs(context: Context) {
         val f = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
         return logEntries().count { it.kind == Kind.SENT && !it.test && it.ts > 0 && f.format(Date(it.ts)) == t }
     }
+}
+
+/** 어떤 상황의 문구를 보낼지 */
+enum class MsgType(val label: String) {
+    BASIC("기본"), MISSED("부재중"), NO_ANSWER("연결 안 됨");
+    companion object { fun of(name: String?) = values().firstOrNull { it.name == name } ?: BASIC }
 }
 
 object Phone {
