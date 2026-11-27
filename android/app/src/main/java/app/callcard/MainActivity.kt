@@ -94,7 +94,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() { super.onStart(); prefs.listen(prefsListener) }
     override fun onStop() { prefs.unlisten(prefsListener); super.onStop() }
-    override fun onResume() { super.onResume(); refreshAll() }
+    override fun onResume() { super.onResume(); visible = true; refreshAll() }
+    override fun onPause() { visible = false; super.onPause() }
 
     // ------------------------------------------------------------------ 상단 상태
 
@@ -148,6 +149,9 @@ class MainActivity : ComponentActivity() {
             Step("명함 이미지", "보낼 명함 사진을 고릅니다", prefs.hasCard, "선택") { pickCard() },
             Step("보낼 문구", "예시 문구 자동 생성으로 쉽게 만들 수 있어요", prefs.intro.isNotBlank(), "작성") {
                 selectTab(0); v<EditText>(R.id.etIntro).requestFocus()
+            },
+            Step("자동 업데이트 허용", "새 버전이 나오면 알아서 설치되게 합니다", !Updater.configured || Updater.canInstall(this), "허용") {
+                Updater.openInstallPermissionSettings(this)
             },
             Step("테스트 발송", "내 번호로 보내서 받아 봅니다", prefs.testDone, "보내기") {
                 selectTab(1)
@@ -595,6 +599,7 @@ class MainActivity : ComponentActivity() {
 
     // ------------------------------------------------------------------ 앱 업데이트
 
+    /** 새 버전이 있으면 묻지 않고 내려받아 설치합니다. 설치 허용이 없을 때만 안내합니다. */
     private fun checkUpdate(manual: Boolean) {
         if (!Updater.configured) return
         if (manual) toast("새 버전을 확인하는 중…")
@@ -603,28 +608,25 @@ class MainActivity : ComponentActivity() {
             runOnUiThread {
                 if (isFinishing) return@runOnUiThread
                 if (r == null) { if (manual) toast("최신 버전입니다."); return@runOnUiThread }
-                AlertDialog.Builder(this)
+                if (Updater.canInstall(this)) downloadAndInstall(r)
+                else AlertDialog.Builder(this)
                     .setTitle("새 버전이 있습니다 (v1.${r.versionCode})")
-                    .setMessage(r.notes.ifBlank { "업데이트하시겠습니까?" }.take(600))
+                    .setMessage("자동 업데이트를 하려면 '이 출처의 앱 설치 허용'을 한 번 켜 주세요.\n켜고 돌아오면 바로 설치합니다.")
                     .setNegativeButton("나중에", null)
-                    .setPositiveButton("업데이트") { _, _ -> downloadAndInstall(r) }
+                    .setPositiveButton("허용하러 가기") { _, _ -> Updater.openInstallPermissionSettings(this) }
                     .show()
             }
         }.start()
     }
 
     private fun downloadAndInstall(r: Updater.Release) {
-        if (!Updater.canInstall(this)) {
-            toast("'이 출처의 앱 설치 허용'을 켜고 돌아와 다시 눌러 주세요.")
-            Updater.openInstallPermissionSettings(this); return
-        }
-        toast("내려받는 중…")
+        toast("새 버전(v1.${r.versionCode})을 설치하는 중…")
         Thread {
             try {
                 val apk = Updater.download(this, r)
-                runOnUiThread { Updater.install(this, apk) }
+                Updater.install(this, apk, r.versionCode)
             } catch (e: Exception) {
-                runOnUiThread { toast("업데이트 다운로드 실패: ${e.message}") }
+                runOnUiThread { toast("업데이트 실패: ${e.message}") }
             }
         }.start()
     }
@@ -690,5 +692,9 @@ class MainActivity : ComponentActivity() {
     private fun toast(s: String) = Toast.makeText(this, s, Toast.LENGTH_SHORT).show()
     private fun <T : View> v(id: Int): T = findViewById(id)
 
-    companion object { private const val STEPS = 5 }
+    companion object {
+        private const val STEPS = 6
+        /** 설치 확인 화면을 바로 띄울 수 있는지(앱이 화면에 보이는지) */
+        @Volatile var visible = false
+    }
 }

@@ -52,7 +52,8 @@ object Notifier {
         notify(context, idFor(number) + 1, n)
     }
 
-    fun showUpdate(context: Context, versionName: String) {
+    /** 설치 허용이 없어 자동 업데이트를 못 할 때 */
+    fun showUpdate(context: Context, versionName: String, needsPermission: Boolean = false) {
         val open = PendingIntent.getActivity(
             context, 9001,
             Intent(context, MainActivity::class.java).putExtra("checkUpdate", true),
@@ -60,12 +61,36 @@ object Notifier {
         )
         val n = NotificationCompat.Builder(context, CH_RESULT)
             .setSmallIcon(R.drawable.ic_stat)
-            .setContentTitle("콜명함 업데이트가 있습니다")
-            .setContentText("$versionName — 눌러서 설치하세요")
+            .setContentTitle("콜명함 $versionName 업데이트가 있습니다")
+            .setContentText(if (needsPermission) "자동 업데이트를 위해 '이 출처의 앱 설치'를 허용해 주세요" else "눌러서 설치하세요")
             .setContentIntent(open)
             .setAutoCancel(true)
             .build()
         notify(context, 9001, n)
+    }
+
+    /** 처음 한 번은 Android가 설치 확인을 요구합니다 */
+    fun showInstallConfirm(context: Context, versionName: String, confirm: Intent) {
+        val pi = PendingIntent.getActivity(context, 9002, confirm,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val n = NotificationCompat.Builder(context, CH_RESULT)
+            .setSmallIcon(R.drawable.ic_stat)
+            .setContentTitle("콜명함 $versionName 설치 준비 완료")
+            .setContentText("눌러서 [업데이트]를 한 번만 눌러 주세요. 다음부터는 자동으로 설치됩니다.")
+            .setContentIntent(pi)
+            .setAutoCancel(true)
+            .build()
+        notify(context, 9002, n)
+    }
+
+    fun showUpdated(context: Context, versionName: String) {
+        val n = NotificationCompat.Builder(context, CH_RESULT)
+            .setSmallIcon(R.drawable.ic_stat)
+            .setContentTitle("콜명함이 v$versionName(으)로 업데이트되었습니다")
+            .setContentText("설정과 문구는 그대로입니다.")
+            .setAutoCancel(true)
+            .build()
+        notify(context, 9003, n)
     }
 
     private fun action(context: Context, act: String, number: String, type: MsgType): PendingIntent =

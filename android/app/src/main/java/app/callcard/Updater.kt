@@ -1,6 +1,8 @@
 package app.callcard
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageInstaller
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -80,12 +82,41 @@ object Updater {
         )
     }
 
-    fun install(context: Context, apk: File) {
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.mms", apk)
-        context.startActivity(
-            Intent(Intent.ACTION_VIEW)
-                .setDataAndType(uri, "application/vnd.android.package-archive")
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
-        )
+    /**
+     * PackageInstaller로 설치합니다.
+     * Android 12 이상에서 이 앱이 스스로 설치한 적이 있으면(두 번째 업데이트부터) 확인 화면 없이 바로 설치됩니다.
+     * 확인이 필요하면 InstallResultReceiver가 설치 화면을 띄우거나 알림을 보냅니다.
+     */
+    fun install(context: Context, apk: File, versionCode: Int) {
+        val installer = context.packageManager.packageInstaller
+        val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
+            setAppPackageName(context.packageName)
+            if (Build.VERSION.SDK_INT >= 31) setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
+        }
+        val id = installer.createSession(params)
+        installer.openSession(id).use { session ->
+            session.openWrite("base.apk", 0, apk.length()).use { out ->
+                apk.inputStream().use { it.copyTo(out) }
+                session.fsync(out)
+            }
+            val result = PendingIntent.getBroadcast(
+                context, id,
+                Intent(context, InstallResultReceiver::class.java).putExtra("versionCode", versionCode),
+                PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0)
+            )
+            session.commit(result.intentSender)
+        }
+    }
+
+    /** 새 버전이 있으면 내려받아 설치까지 진행합니다. (백그라운드 작업에서 호출) */
+    fun autoUpdate(context: Context): Boolean {
+        val r = newerRelease() ?: return false
+        if (!canInstall(context)) {
+            Notifier.showUpdate(context, "v1.${r.versionCode}", needsPermission = true)
+            return false
+        }
+        val apk = download(context, r)
+        install(context, apk, r.versionCode)
+        return true
     }
 }

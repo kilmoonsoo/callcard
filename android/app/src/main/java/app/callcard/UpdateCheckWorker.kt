@@ -10,22 +10,23 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import java.util.concurrent.TimeUnit
 
-/** 하루에 한 번 새 버전을 확인하고, 있으면 알림을 띄웁니다. */
+/** 6시간마다 새 버전을 확인하고, 있으면 내려받아 자동으로 설치합니다. */
 class UpdateCheckWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
-    override fun doWork(): Result {
-        val r = Updater.newerRelease() ?: return Result.success()
-        Notifier.showUpdate(applicationContext, r.name.ifBlank { "새 버전" })
-        return Result.success()
+    override fun doWork(): Result = try {
+        Updater.autoUpdate(applicationContext)
+        Result.success()
+    } catch (e: Exception) {
+        Result.retry()
     }
 
     companion object {
         fun schedule(context: Context) {
             if (!Updater.configured) return
-            val req = PeriodicWorkRequestBuilder<UpdateCheckWorker>(1, TimeUnit.DAYS)
+            val req = PeriodicWorkRequestBuilder<UpdateCheckWorker>(6, TimeUnit.HOURS)
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .build()
             WorkManager.getInstance(context)
-                .enqueueUniquePeriodicWork("update-check", ExistingPeriodicWorkPolicy.KEEP, req)
+                .enqueueUniquePeriodicWork("update-check", ExistingPeriodicWorkPolicy.UPDATE, req)
         }
     }
 }
